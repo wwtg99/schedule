@@ -1,0 +1,11 @@
+{
+  "min_round": "hour",
+  "jobs": [
+    {
+      "name": "test1",
+      "type": "cmd",
+      "time": "I1s",
+      "cmd": "id"
+    }
+  ]
+}
