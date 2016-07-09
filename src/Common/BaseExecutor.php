@@ -28,6 +28,13 @@ abstract class BaseExecutor implements IExecutor
     protected $cache_file = '';
 
     /**
+     * Script to run
+     *
+     * @var string
+     */
+    protected $runner = '';
+
+    /**
      * @var array
      */
     protected $config = [];
@@ -66,6 +73,7 @@ abstract class BaseExecutor implements IExecutor
     public function init($config)
     {
         $this->config = $config;
+        $this->runner = isset($config['runner']) ? $config['runner'] : 'scheduler.php';
         if (isset($config['cache_file'])) {
             $this->cache_file = $config['cache_file'];
         }

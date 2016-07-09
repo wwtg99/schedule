@@ -22,11 +22,17 @@ class CronExecutor extends BaseExecutor
         parent::register();
         $cron_time = $this->getCronTime();
         $f = 'crontab.cache';
-        $cont = $cron_time . ' php ' . $this->config['runner'] . ' --run';
+        $cont = $cron_time . ' php ' . $this->config['runner'] . ' --run --cache ' . realpath($this->cache_file) . "\n";
         file_put_contents($f, $cont);
-        exec("crontab $f");
+        try {
+            exec("crontab $f");
 //        echo "crontab $f\n";
-        return 'success';
+            $re = 'success';
+        } catch (\Exception $e) {
+            $re = 'failed';
+        }
+        unlink($f);
+        return $re;
     }
 
     /**
@@ -37,9 +43,14 @@ class CronExecutor extends BaseExecutor
     public function unregister()
     {
         parent::unregister();
-        exec("crontab -r");
+        try {
+            exec("crontab -r");
 //        echo "crontab -r\n";
-        return 'success';
+            $re = 'success';
+        } catch (\Exception $e) {
+            $re = 'failed';
+        }
+        return $re;
     }
 
     /**
@@ -69,16 +80,14 @@ class CronExecutor extends BaseExecutor
         if (isset($this->config['cron_time'])) {
             return $this->config['cron_time'];
         }
-        $round = isset($this->config['min_round']) ? $this->config['min_round'] : 'second';
+        $round = isset($this->config['min_round']) ? $this->config['min_round'] : 'minute';
         switch ($round) {
-            case 'year': return '0 0 0 1 1 ? */1';
-            case 'month': return '0 0 0 1 */1 ? *';
-            case 'week': return '0 0 0 ? * 1 *';
-            case 'day': return '0 0 0 */1 * ? *';
-            case 'hour': return '0 0 */1 * * ? *';
-            case 'minute': return '0 */1 * * * ? *';
-            case 'second':
-            default: return '*/1 * * * * ? *';
+            case 'month': return '0 0 1 * *';
+            case 'week': return '0 0 * * 1';
+            case 'day': return '0 0 * * *';
+            case 'hour': return '0 * * * *';
+            case 'minute':
+            default: return '*/1 * * * *';
         }
     }
 

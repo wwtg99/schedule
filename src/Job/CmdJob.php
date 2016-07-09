@@ -39,7 +39,7 @@ class CmdJob extends BaseJob
     public function run()
     {
         if ($this->cmd) {
-            echo 'run ' . $this->cmd . "\n";
+//            echo 'run ' . $this->cmd . "\n";
             exec($this->cmd);
             $this->setLastTime(time());
             $this->calNextTime();

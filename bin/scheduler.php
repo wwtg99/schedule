@@ -7,14 +7,14 @@
  */
 
 date_default_timezone_set('Asia/Shanghai');
+
+//autoload
 require_once __DIR__ . DIRECTORY_SEPARATOR . '../vendor/autoload.php';
 $loader = new \ClassLoader\Loader(__DIR__ . DIRECTORY_SEPARATOR . '..', [['Schedule', 'src', true]]);
 $loader->autoload();
 
+//default config file
 $job_config = 'jobs.json';
-$cache_file = 'jobs.cache';
-
-$opt = getopt('hv', ['jobs::', 'cache::', 'version', 'help', 'register', 'unregister', 'run', 'list', 'add-job::', 'remove-job::']);
 
 function showVersion()
 {
@@ -26,8 +26,19 @@ function showHelp()
 {
     showVersion();
     echo "\n";
-    $help = "--register    register all jobs loaded and start schedule\n--unregister    remove schedule\n--run run schedule once\n--list    list jobs\n--add-job=name;type;time;config    add job, config should be json format\n--remove-job=name    remove job\n--jobs=config_file    jobs json config file path(default jobs.json)\n--cache=cache_file    cache file path(default jobs.cache)\n-v  --version    show version\n-h  --help    show help";
-    echo $help . "\n";
+    $help = [
+        "  --register    register all jobs loaded and start schedule",
+        "  --unregister    remove schedule",
+        "  --run run schedule once",
+        "  --list    list jobs",
+        "  --add-job=name;type;time;config    add job, config should be json format",
+        "  --remove-job=name    remove job",
+        "  --jobs=config_file    jobs json config file path(default jobs.json)",
+        "  --cache=cache_file    cache file path(default jobs.cache)",
+        "  -v  --version    show version",
+        "  -h  --help    show help"
+    ];
+    echo implode("\n", $help) . "\n";
 }
 
 /**
@@ -36,7 +47,7 @@ function showHelp()
 function register($executor)
 {
     $re = $executor->register();
-    echo "Scheduler register $re";
+    echo "Scheduler register $re\n";
 }
 
 /**
@@ -45,7 +56,7 @@ function register($executor)
 function unregister($executor)
 {
     $re = $executor->unregister();
-    echo "Scheduler unregister $re";
+    echo "Scheduler unregister $re\n";
 }
 
 /**
@@ -93,13 +104,13 @@ function removeJob($executor, $name)
         foreach ($name as $n) {
             $re = $executor->removeJob($n);
             if ($re) {
-                echo "Remove job $n";
+                echo "Remove job $n\n";
             }
         }
     } else {
         $re = $executor->removeJob($name);
         if ($re) {
-            echo "Remove job $name";
+            echo "Remove job $name\n";
         }
     }
 }
@@ -114,41 +125,96 @@ function run($executor)
     return $re;
 }
 
+/**
+ * @param string|null $conf config file
+ * @param array $opts
+ * @return array
+ */
+function getConfig($conf = null, $opts = [])
+{
+    //default config
+    $config = [
+        'cache_file'=>'.jobs_cache'
+    ];
+    if ($conf) {
+        $f = file_get_contents($conf);
+        $c = json_decode($f, true);
+        $config = array_merge($config, $c);
+    }
+    if ($opts) {
+        $config = array_merge($config, $opts);
+    }
+    $config['runner'] = realpath(__FILE__);
+    return $config;
+}
+
 $code = 0;
 try {
-    if (isset($opt['v']) || isset($opt['version'])) {
-        showVersion();
-        exit(0);
-    } elseif (isset($opt['h']) || isset($opt['help'])) {
-        showVersion();
-        showHelp();
-        exit(0);
-    } elseif (isset($opt['jobs'])) {
-        $job_config = $opt['jobs'];
-    } elseif (isset($opt['cache'])) {
-        $cache_file = $opt['cache'];
-    }
     $executor = new \Schedule\Executor\CronExecutor();
-    $config = file_get_contents($job_config);
-    $config = json_decode($config, true);
-    $config['cache_file'] = $cache_file;
-    $config['runner'] = realpath(__FILE__);
-    $executor->init($config);
-    if (isset($opt['register'])) {
-        register($executor);
-    } elseif (isset($opt['unregister'])) {
-        unregister($executor);
-    } elseif (isset($opt['list'])) {
-        listJobs($executor);
-    } elseif (isset($opt['add-job'])) {
-        addJob($executor, $opt['add-job']);
-        register($executor);
-    } elseif (isset($opt['remove-job'])) {
-        removeJob($executor, $opt['remove-job']);
-    } elseif (isset($opt['run'])) {
-        $code = run($executor);
+    if ($argc > 1) {
+        $cmd = $argv[1];
+        if ($cmd == 'register') {
+            $config = getConfig($job_config);
+            $executor->init($config);
+            register($executor);
+        } elseif ($cmd == 'unregister') {
+            $config = getConfig();
+            $executor->init($config);
+            unregister($executor);
+        } elseif ($cmd == 'list') {
+            $config = getConfig();
+            $executor->init($config);
+            listJobs($executor);
+        } elseif ($cmd == 'run') {
+            $config = getConfig();
+            $executor->init($config);
+            run($executor);
+        } elseif ($cmd == 'version') {
+            showVersion();
+        } else {
+            $opt = getopt('hv', ['jobs:', 'cache:', 'version', 'help', 'register', 'unregister', 'run', 'list', 'add-job:', 'remove-job:']);
+            $p = [];
+            if (isset($opt['jobs'])) {
+                $job_config = $opt['jobs'];
+            } elseif (isset($opt['cache'])) {
+                $p['cache_file'] = $opt['cache'];
+            }
+            if (isset($opt['register'])) {
+                $config = getConfig($job_config, $p);
+                $executor->init($config);
+                register($executor);
+            } elseif (isset($opt['unregister'])) {
+                $config = getConfig(null, $p);
+                $executor->init($config);
+                unregister($executor);
+            } elseif (isset($opt['list'])) {
+                $config = getConfig(null, $p);
+                $executor->init($config);
+                listJobs($executor);
+            } elseif (isset($opt['add-job'])) {
+                $config = getConfig(null, $p);
+                $executor->init($config);
+                addJob($executor, $opt['add-job']);
+                register($executor);
+            } elseif (isset($opt['remove-job'])) {
+                $config = getConfig(null, $p);
+                $executor->init($config);
+                removeJob($executor, $opt['remove-job']);
+            } elseif (isset($opt['run'])) {
+                $config = getConfig(null, $p);
+                $executor->init($config);
+                $code = run($executor);
+            } elseif (isset($opt['v']) || isset($opt['version'])) {
+                showVersion();
+                exit(0);
+            } else {
+                showHelp();
+                exit(0);
+            }
+        }
     } else {
         showHelp();
+        exit(0);
     }
 } catch (Exception $e) {
     showHelp();

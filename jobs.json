@@ -1,11 +1,11 @@
 {
-  "min_round": "hour",
+  "min_round": "minute",
   "jobs": [
     {
       "name": "test1",
       "type": "cmd",
-      "time": "I1s",
-      "cmd": "id"
+      "time": "I5s",
+      "cmd": "date > /tmp/1.txt"
     }
   ]
 }
