@@ -2,10 +2,26 @@
   "min_round": "minute",
   "jobs": [
     {
-      "name": "test1",
+      "name": "test_date",
       "type": "cmd",
-      "time": "I5s",
-      "cmd": "date > /tmp/1.txt"
+      "time": "I1i",
+      "cmd": "date > `date \"+/tmp/test-%F.txt\"`"
+    },
+    {
+      "name": "pg_dump",
+      "type": "pg_dump",
+      "time": "I1d",
+      "database": {
+        "host": "",
+        "port": 5432,
+        "dbname": "test1",
+        "username": "postgres",
+        "file_format": "%Y-%m-%d",
+        "out": "/tmp",
+        "file_type": "d",
+        "jobs": 3,
+        "params": "-w"
+      }
     }
   ]
 }

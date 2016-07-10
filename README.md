@@ -4,6 +4,9 @@
 Run schedule jobs.
 Supported Executors:
   - CronExecutor  based on linux crontab
+Supported Jobs:
+  - CmdJob: type cmd, execute shell commands
+  - PgDumpJob: type pg_dump, execute pg_dump
 
 ### Configuration
 - min_round: the min interval to check jobs, 
@@ -17,6 +20,7 @@ if specified, will replace min_round
     - interval format (start with I): `I1y1m1d1h1i1s` (`I3i` means every three minutes)
     - cron format: not supported yet
   - cmd: command to execute, used in CmdJob
+  - database: database connection for PgDumpJob
 
 ### Usage
 1. Define config in jobs.json

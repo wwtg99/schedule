@@ -10,6 +10,7 @@ namespace Schedule\Common;
 
 
 use Schedule\Job\CmdJob;
+use Schedule\Job\PgDumpJob;
 
 class JobFactory
 {
@@ -24,9 +25,15 @@ class JobFactory
         switch ($type) {
             case 'cmd':
                 $job = new CmdJob();
-                $job->init($config);
-                return $job;
-            default: return null;
+                break;
+            case 'pg_dump':
+                $job = new PgDumpJob();
+                break;
         }
+        if (isset($job) && $job instanceof IJob) {
+            $job->init($config);
+            return $job;
+        }
+        return null;
     }
 }
