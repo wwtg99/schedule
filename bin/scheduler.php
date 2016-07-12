@@ -35,6 +35,8 @@ function showHelp()
         "  --remove-job=name    remove job",
         "  --jobs=config_file    jobs json config file path(default jobs.json)",
         "  --cache=cache_file    cache file path(default jobs.cache)",
+        "  -f  --force    force to run",
+        "  -V  --verbose    verbose",
         "  -v  --version    show version",
         "  -h  --help    show help"
     ];
@@ -64,10 +66,10 @@ function unregister($executor)
  */
 function listJobs($executor)
 {
+    echo "Registered job\t|\tNext execute time\n";
     $jobs = $executor->listJobs();
-    foreach ($jobs as $name => $reg) {
-        $r = $reg ? 'registered' : 'unregistered';
-        echo "Job  $name    $r\n";
+    foreach ($jobs as $name => $nt) {
+        echo "$name\t|\t$nt\n";
     }
 }
 
@@ -172,12 +174,19 @@ try {
         } elseif ($cmd == 'version') {
             showVersion();
         } else {
-            $opt = getopt('hv', ['jobs:', 'cache:', 'version', 'help', 'register', 'unregister', 'run', 'list', 'add-job:', 'remove-job:']);
+            $opt = getopt('fhvV', ['jobs:', 'cache:', 'version', 'help', 'register', 'unregister', 'run', 'list', 'add-job:', 'remove-job:', 'verbose', 'force']);
             $p = [];
             if (isset($opt['jobs'])) {
                 $job_config = $opt['jobs'];
-            } elseif (isset($opt['cache'])) {
+            }
+            if (isset($opt['cache'])) {
                 $p['cache_file'] = $opt['cache'];
+            }
+            if (isset($opt['V']) || isset($opt['verbose'])) {
+                $p['verbose'] = true;
+            }
+            if (isset($opt['f']) || isset($opt['force'])) {
+                $p['force'] = true;
             }
             if (isset($opt['register'])) {
                 $config = getConfig($job_config, $p);

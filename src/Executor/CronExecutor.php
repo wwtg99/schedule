@@ -62,8 +62,14 @@ class CronExecutor extends BaseExecutor
         $code = 0;
         foreach ($this->register_jobs as $name => $job) {
             if ($job instanceof IJob) {
-                if ($job->shouldRun()) {
+                if ($this->force || $job->shouldRun()) {
+                    if ($this->verbose) {
+                        echo "Run job $name\n";
+                    }
                     $re = $job->run();
+                    if ($this->verbose) {
+                        echo "Return code of job $name: $re\n";
+                    }
                     $code |= $re;
                 }
             }

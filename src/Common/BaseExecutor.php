@@ -35,6 +35,16 @@ abstract class BaseExecutor implements IExecutor
     protected $runner = '';
 
     /**
+     * @var bool
+     */
+    protected $verbose = false;
+
+    /**
+     * @var bool
+     */
+    protected $force = false;
+
+    /**
      * @var array
      */
     protected $config = [];
@@ -49,6 +59,9 @@ abstract class BaseExecutor implements IExecutor
                 $re = $job->register();
                 if ($re !== false) {
                     $this->register_jobs[$name] = $job;
+                    if ($this->verbose) {
+                        echo "Register job $name\n";
+                    }
                 }
             }
         }
@@ -63,6 +76,9 @@ abstract class BaseExecutor implements IExecutor
     {
         $this->register_jobs = [];
         $this->saveCache();
+        if ($this->verbose) {
+            echo "Unregister all jobs\n";
+        }
         return 0;
     }
 
@@ -88,6 +104,12 @@ abstract class BaseExecutor implements IExecutor
                 $this->addJob($name, $type, $inv, $job);
             }
         }
+        if (isset($config['verbose']) && $config['verbose']) {
+            $this->verbose = true;
+        }
+        if (isset($config['force']) && $config['force']) {
+            $this->force = true;
+        }
         return $this;
     }
 
@@ -105,6 +127,9 @@ abstract class BaseExecutor implements IExecutor
             $j = JobFactory::getJob($type, $job);
             if ($j) {
                 $this->jobs[$name] = $j;
+                if ($this->verbose) {
+                    echo "Add job $name\n";
+                }
                 return true;
             }
         }
@@ -124,6 +149,9 @@ abstract class BaseExecutor implements IExecutor
             unset($this->register_jobs[$name]);
         }
         $this->saveCache();
+        if ($this->verbose) {
+            echo "Remove job $name\n";
+        }
         return true;
     }
 
@@ -135,7 +163,13 @@ abstract class BaseExecutor implements IExecutor
         $this->loadCache();
         $js = [];
         foreach ($this->register_jobs as $name => $job) {
-            $js[$name] = true;
+            $nt = $job->getNextTime();
+            if ($nt) {
+                $nt = strftime('%Y-%m-%d %H:%M:%S', $nt);
+            } else {
+                $nt = 'Immediately';
+            }
+            $js[$name] = $nt;
         }
         return $js;
     }
