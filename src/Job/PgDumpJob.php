@@ -67,7 +67,7 @@ class PgDumpJob extends CmdJob
             $this->cmd_arr['jobs'] = trim($db['jobs']);
         }
         if (isset($db['params']) && $db['params']) {
-            $this->cmd_arr['params'] =  trim($this->cmd_arr['params']);
+            $this->cmd_arr['params'] =  trim($db['params']);
         }
         $this->cmd = $this->createCmd();
         return true;
