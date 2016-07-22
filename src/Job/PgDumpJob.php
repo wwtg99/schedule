@@ -70,6 +70,7 @@ class PgDumpJob extends CmdJob
             $this->cmd_arr['params'] =  trim($db['params']);
         }
         $this->cmd = $this->createCmd();
+        $this->descr = $this->cmd;
         return true;
     }
 
@@ -81,9 +82,8 @@ class PgDumpJob extends CmdJob
     public function run()
     {
         $re = parent::run();
-        if ($re === 0) {
-            $this->cmd = $this->createCmd();
-        }
+        $this->cmd = $this->createCmd();
+        return $re;
     }
 
     /**

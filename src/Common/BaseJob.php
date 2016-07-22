@@ -33,6 +33,11 @@ abstract class BaseJob implements IJob
     protected $config = [];
 
     /**
+     * @var string
+     */
+    protected $descr = '';
+
+    /**
      * @param array $config
      * @return IJob
      */
@@ -94,7 +99,15 @@ abstract class BaseJob implements IJob
         if (!$this->last_time || $this->last_time < 0) {
             return true;
         }
-        return $this->next_time <= time();
+        return $this->next_time && $this->next_time <= time();
+    }
+
+    /**
+     * @return string
+     */
+    public function getDescription()
+    {
+        return $this->descr;
     }
 
     /**

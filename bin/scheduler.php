@@ -66,10 +66,10 @@ function unregister($executor)
  */
 function listJobs($executor)
 {
-    echo "Registered job\t|\tNext execute time\n";
+    echo "Registered job\t|\tNext execute time\t|\tDescription\n";
     $jobs = $executor->listJobs();
-    foreach ($jobs as $name => $nt) {
-        echo "$name\t|\t$nt\n";
+    foreach ($jobs as $name => $j) {
+        echo "$name\t|\t$j[0]\t|\t$j[1]\n";
     }
 }
 

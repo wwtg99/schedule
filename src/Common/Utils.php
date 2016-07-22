@@ -17,7 +17,7 @@ class Utils
     /**
      * @param string $interval
      * @param int $lastTime
-     * @return int
+     * @return int|bool
      */
     public static function calNextTime($interval, $lastTime)
     {
@@ -89,23 +89,132 @@ class Utils
     /**
      * @param string $interval
      * @param int $lastTime
-     * @return int
+     * @return int|bool
      */
     private static function calCronTime($interval, $lastTime)
     {
         $timecol = preg_split('/\s+/', $interval);
-        if (count($timecol) < 7) {
+        if (count($timecol) < 5) {
             echo 'invalid time ' . $interval;
             return false;
         }
-        $sec = $timecol[0];
-        $min = $timecol[1];
-        $hour = $timecol[2];
-        $dom = $timecol[3];
-        $mon = $timecol[4];
-        $dow = $timecol[5];
-        $year = $timecol[6];
-        $date = Carbon::createFromTimestamp($lastTime);
-        return false;//TODO
+        $min = $timecol[0];
+        $hour = $timecol[1];
+        $date = $timecol[2];
+        $mon = $timecol[3];
+        $dow = $timecol[4];
+        $last = Carbon::createFromTimestamp($lastTime);
+        //num or * or num/step
+        $minf = self::parseCronField($min);
+        if ($minf === true) {
+            $min = $last->minute;
+        } elseif (is_array($minf)) {
+            //TODO always be */n
+            $min = $last->minute + $minf[1];
+        } elseif (is_int($minf)) {
+            $min = $minf;
+        } else {
+            return false;
+        }
+        $hourf = self::parseCronField($hour);
+        if ($hourf === true) {
+            $hour = $last->hour;
+            if ($min < $last->minute) {
+                $hour++;
+            }
+        } elseif (is_array($hourf)) {
+            //TODO always be */n
+            $hour = $last->hour + $hourf[1];
+        } elseif (is_int($hourf)) {
+            $hour = $hourf;
+        } else {
+            return false;
+        }
+        $datef = self::parseCronField($date);
+        if ($datef === true) {
+            $date = $last->day;
+            if ($hour < $last->hour) {
+                $date++;
+            }
+        } elseif (is_array($datef)) {
+            //TODO always be */n
+            $date = $last->day + $datef[1];
+        } elseif (is_int($datef)) {
+            $date = $datef;
+        } else {
+            return false;
+        }
+        if ($datef === true && isset($day_add)) {
+            $date += $day_add;
+        }
+        $monf = self::parseCronField($mon);
+        if ($monf === true) {
+            $mon = $last->month;
+            if ($date < $last->day) {
+                $mon++;
+            }
+        } elseif (is_array($monf)) {
+            //TODO always be */n
+            $mon = $last->month + $monf[1];
+        } elseif (is_int($monf)) {
+            $mon = $monf;
+        } else {
+            return false;
+        }
+        if ($monf === true && isset($mon_add)) {
+            $mon += $mon_add;
+        }
+        $dowf = self::parseCronField($dow);
+        if ($dowf === true) {
+            $dow = false;
+        } elseif (is_array($dowf)) {
+            $dow = false;
+        } elseif (is_int($dowf)) {
+            $dow = $dowf;
+        } else {
+            return false;
+        }
+        $year = $last->year;
+//        if ($mon < $last->month) {
+//            $year++;
+//        }
+        if ($minf === true && $hourf === true && $datef === true && $monf === true) {
+            $min += 1;
+        }
+        $next = Carbon::create($year, $mon, $date, $hour, $min);
+        if ($dow && $next->dayOfWeek != $dow) {
+            if ($next->dayOfWeek > $dow) {
+                $next->addDays($next->dayOfWeek - $dow);
+            } else {
+                $next->addDays(7 - $next->dayOfWeek + $dow);
+            }
+        }
+        return $next->getTimestamp();
+    }
+
+    /**
+     * @param $val
+     * @return array|bool|int
+     */
+    private static function parseCronField($val)
+    {
+        $val = trim($val);
+        if ($val == '*') {
+            return true;
+        } elseif (strpos($val, '/') > 0) {
+            $c = explode('/', $val);
+            if (count($c) == 2) {
+                if ($c[1] <= 0) {
+                    return false;
+                }
+                return [$c[0], intval($c[1])];
+            } else {
+                return false;
+            }
+        } elseif (is_numeric($val)) {
+            return intval($val);
+        } else {
+            return false;
+        }
     }
 }

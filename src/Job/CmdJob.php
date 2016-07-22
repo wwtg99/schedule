@@ -28,6 +28,7 @@ class CmdJob extends BaseJob
     public function register()
     {
         $this->cmd = isset($this->config['cmd']) ? $this->config['cmd'] : '';
+        $this->descr = $this->cmd;
         return true;
     }
 

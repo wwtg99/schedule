@@ -64,4 +64,9 @@ interface IJob
      * @return bool
      */
     public function shouldRun();
+
+    /**
+     * @return string
+     */
+    public function getDescription();
 }

@@ -23,13 +23,16 @@ if specified, will replace min_round
   - database: database connection for PgDumpJob
 
 ### Usage
-1. Define config in jobs.json
-2. Register schedule
+- Define config in jobs.json or file defined by --jobs
+- Register schedule, jobs will be registered in crontab
 ```
 php bin/scheduler.php --register
 ```
-3. Show jobs
+- Show jobs
 ```
 php bin/scheduler.php --list
 ```
-3. Jobs will be registered in crontab.
+- Run jobs manually, use -f option to run regardless of next execution time
+```
+php bin/scheduler.php --run
+```

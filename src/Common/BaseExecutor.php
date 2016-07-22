@@ -169,7 +169,8 @@ abstract class BaseExecutor implements IExecutor
             } else {
                 $nt = 'Immediately';
             }
-            $js[$name] = $nt;
+            $des = $job->getDescription();
+            $js[$name] = [$nt, $des];
         }
         return $js;
     }

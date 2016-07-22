@@ -39,21 +39,21 @@ class TestSchedule extends PHPUnit_Framework_TestCase
         $executor->init(['runner'=>__FILE__]);
         $this->assertTrue($executor->addJob('test1', 'cmd', 'I3s', ['cmd'=>'dir']));
         $this->assertTrue($executor->register() !== false);
-        $this->assertEquals(['test1'=>true], $executor->listJobs());
+        $this->assertEquals(['test1'=>['Immediately', 'dir']], $executor->listJobs());
         $this->assertTrue($executor->addJob('test2', 'cmd', 'I2s', ['cmd'=>'dir']));
-        $this->assertEquals(['test1'=>true, 'test2'=>false], $executor->listJobs());
+        $this->assertEquals(['test1'=>['Immediately', 'dir']], $executor->listJobs());
         $this->assertFalse($executor->addJob('test2', 'cmd', 'I2s', ['cmd'=>'dir']));
         $this->assertTrue($executor->removeJob('test2'));
-        $this->assertEquals(['test1'=>true], $executor->listJobs());
+        $this->assertEquals(['test1'=>['Immediately', 'dir']], $executor->listJobs());
         $this->assertTrue($executor->removeJob('test1'));
         $this->assertEquals([], $executor->listJobs());
         $this->assertTrue($executor->addJob('test1', 'cmd', 'I3s', ['cmd'=>'id']));
         $this->assertTrue($executor->register() !== false);
         $this->assertTrue($executor->addJob('test3', 'cmd', 'I2s', ['cmd'=>'whoami']));
         $this->assertTrue($executor->unregister() !== false);
-        $this->assertEquals(['test1'=>false, 'test3'=>false], $executor->listJobs());
+        $this->assertEquals([], $executor->listJobs());
         $this->assertTrue($executor->register() !== false);
-        $this->assertEquals(['test1'=>true, 'test3'=>true], $executor->listJobs());
+        $this->assertEquals(['test1'=>['Immediately', 'id'], 'test3'=>['Immediately', 'whoami']], $executor->listJobs());
         echo '===run id and whoami' . "\n";
         $this->assertEquals(0, $executor->execute());
         echo '===run none' . "\n";
@@ -82,7 +82,10 @@ class TestSchedule extends PHPUnit_Framework_TestCase
         foreach ($check_inv as $inv => $exp) {
             $this->assertEquals($exp, \Schedule\Common\Utils::parseInterval($inv), "Interval $inv");
         }
-        $last = DateTime::createFromFormat('Y-m-d H:i:s', '2016-07-09 10:10:02')->getTimestamp();
+        $lastTime = \Carbon\Carbon::create(2016, 7, 9, 10, 10, 2);
+        $last = $lastTime->getTimestamp();
+//        $last = DateTime::createFromFormat('Y-m-d H:i:s', '2016-07-09 10:10:02')->getTimestamp();
+        //check interval
         $check_next = [
             'I10s'=>DateTime::createFromFormat('Y-m-d H:i:s', '2016-07-09 10:10:12')->getTimestamp(),
             'I1h2i'=>DateTime::createFromFormat('Y-m-d H:i:s', '2016-07-09 11:12:02')->getTimestamp(),
@@ -92,6 +95,16 @@ class TestSchedule extends PHPUnit_Framework_TestCase
             'I5d10h'=>DateTime::createFromFormat('Y-m-d H:i:s', '2016-07-14 20:10:02')->getTimestamp(),
             'I100s'=>DateTime::createFromFormat('Y-m-d H:i:s', '2016-07-09 10:11:42')->getTimestamp(),
             'I20h'=>DateTime::createFromFormat('Y-m-d H:i:s', '2016-07-10 06:10:02')->getTimestamp(),
+        ];
+        foreach ($check_next as $inv => $exp) {
+            $next = \Schedule\Common\Utils::calNextTime($inv, $last);
+            $this->assertEquals($exp, $next, "Interval $inv");
+        }
+        //check crontab
+        $check_next = [
+            '1 2 3 1 *'=>DateTime::createFromFormat('Y-m-d H:i:s', '2016-01-03 02:01:00')->getTimestamp(),
+            '* * * * *'=>\Carbon\Carbon::createFromTimestamp($last)->addMinute(1)->second(0)->getTimestamp(),
+            '* 2 * * *'=>\Carbon\Carbon::createFromTimestamp($last)->hour(2)->addDay(1)->second(0)->getTimestamp(),
         ];
         foreach ($check_next as $inv => $exp) {
             $next = \Schedule\Common\Utils::calNextTime($inv, $last);
