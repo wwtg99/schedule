@@ -22,6 +22,12 @@
         "jobs": 3,
         "params": "-w"
       }
+    },
+    {
+      "name": "test_id",
+      "type": "cmd",
+      "time": "*/2 * * * *",
+      "cmd": "id > `date \"+/tmp/id_%F.txt.\"`"
     }
   ]
 }

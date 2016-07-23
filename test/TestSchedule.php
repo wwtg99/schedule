@@ -13,15 +13,15 @@ class TestSchedule extends PHPUnit_Framework_TestCase
     {
         date_default_timezone_set('Asia/Shanghai');
         require_once '../vendor/autoload.php';
-        $loader = new \ClassLoader\Loader(__DIR__ . DIRECTORY_SEPARATOR . '..', [['Schedule', 'src', true]]);
+        $loader = new \ClassLoader\Loader(__DIR__ . DIRECTORY_SEPARATOR . '..', [['Wwtg99\Schedule', 'src', true]]);
         $loader->autoload();
     }
 
     public function testJob()
     {
         $job_config = ['name'=>'test1', 'cmd'=>'id', 'type'=>'cmd', 'time'=>'I3s'];
-        $job = \Schedule\Common\JobFactory::getJob('cmd', $job_config);
-        $this->assertInstanceOf('Schedule\Job\CmdJob', $job);
+        $job = \Wwtg99\Schedule\Common\JobFactory::getJob('cmd', $job_config);
+        $this->assertInstanceOf('Wwtg99\Schedule\Job\CmdJob', $job);
         $this->assertTrue($job->register());
         $this->assertEquals('I3s', $job->getTime());
         $this->assertNull($job->getLastTime());
@@ -35,7 +35,7 @@ class TestSchedule extends PHPUnit_Framework_TestCase
 
     public function testExecutor()
     {
-        $executor = new \Schedule\Executor\CronExecutor();
+        $executor = new \Wwtg99\Schedule\Executor\CronExecutor();
         $executor->init(['runner'=>__FILE__]);
         $this->assertTrue($executor->addJob('test1', 'cmd', 'I3s', ['cmd'=>'dir']));
         $this->assertTrue($executor->register() !== false);
@@ -80,7 +80,7 @@ class TestSchedule extends PHPUnit_Framework_TestCase
             'I3d12h'=>['d'=>3, 'h'=>12]
         ];
         foreach ($check_inv as $inv => $exp) {
-            $this->assertEquals($exp, \Schedule\Common\Utils::parseInterval($inv), "Interval $inv");
+            $this->assertEquals($exp, \Wwtg99\Schedule\Common\Utils::parseInterval($inv), "Interval $inv");
         }
         $lastTime = \Carbon\Carbon::create(2016, 7, 9, 10, 10, 2);
         $last = $lastTime->getTimestamp();
@@ -97,7 +97,7 @@ class TestSchedule extends PHPUnit_Framework_TestCase
             'I20h'=>DateTime::createFromFormat('Y-m-d H:i:s', '2016-07-10 06:10:02')->getTimestamp(),
         ];
         foreach ($check_next as $inv => $exp) {
-            $next = \Schedule\Common\Utils::calNextTime($inv, $last);
+            $next = \Wwtg99\Schedule\Common\Utils::calNextTime($inv, $last);
             $this->assertEquals($exp, $next, "Interval $inv");
         }
         //check crontab
@@ -105,9 +105,18 @@ class TestSchedule extends PHPUnit_Framework_TestCase
             '1 2 3 1 *'=>DateTime::createFromFormat('Y-m-d H:i:s', '2016-01-03 02:01:00')->getTimestamp(),
             '* * * * *'=>\Carbon\Carbon::createFromTimestamp($last)->addMinute(1)->second(0)->getTimestamp(),
             '* 2 * * *'=>\Carbon\Carbon::createFromTimestamp($last)->hour(2)->addDay(1)->second(0)->getTimestamp(),
+            '0 12 * * 5'=>\Carbon\Carbon::createFromTimestamp($last)->day(15)->hour(12)->minute(0)->second(0)->getTimestamp(),
+            '0 */1 * * *'=>\Carbon\Carbon::createFromTimestamp($last)->addHour(1)->minute(0)->second(0)->getTimestamp(),
+            '0 9 */1 * *'=>\Carbon\Carbon::createFromTimestamp($last)->addDay(1)->hour(9)->minute(0)->second(0)->getTimestamp(),
+            '0 12 */3 * *'=>\Carbon\Carbon::createFromTimestamp($last)->addDay(3)->hour(12)->minute(0)->second(0)->getTimestamp(),
+            '0 12 1 */1 *'=>\Carbon\Carbon::createFromTimestamp($last)->addMonth(1)->day(1)->hour(12)->minute(0)->second(0)->getTimestamp(),
+            '*/55 * * * *'=>\Carbon\Carbon::createFromTimestamp($last)->addHour(1)->minute(5)->second(0)->getTimestamp(),
+            '0 */15 * * *'=>\Carbon\Carbon::createFromTimestamp($last)->addDay(1)->hour(1)->minute(0)->second(0)->getTimestamp(),
+            '0 5 */25 * *'=>\Carbon\Carbon::createFromTimestamp($last)->addMonth(1)->day(3)->hour(5)->minute(0)->second(0)->getTimestamp(),
+            '0 12 10 */6 *'=>\Carbon\Carbon::createFromTimestamp($last)->addYear(1)->month(1)->day(10)->hour(12)->minute(0)->second(0)->getTimestamp(),
         ];
         foreach ($check_next as $inv => $exp) {
-            $next = \Schedule\Common\Utils::calNextTime($inv, $last);
+            $next = \Wwtg99\Schedule\Common\Utils::calNextTime($inv, $last);
             $this->assertEquals($exp, $next, "Interval $inv");
         }
     }

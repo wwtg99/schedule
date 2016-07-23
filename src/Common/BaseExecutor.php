@@ -6,7 +6,7 @@
  * Time: 14:29
  */
 
-namespace Schedule\Common;
+namespace Wwtg99\Schedule\Common;
 
 
 abstract class BaseExecutor implements IExecutor

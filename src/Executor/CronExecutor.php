@@ -6,11 +6,11 @@
  * Time: 14:25
  */
 
-namespace Schedule\Executor;
+namespace Wwtg99\Schedule\Executor;
 
 
-use Schedule\Common\BaseExecutor;
-use Schedule\Common\IJob;
+use Wwtg99\Schedule\Common\BaseExecutor;
+use Wwtg99\Schedule\Common\IJob;
 
 class CronExecutor extends BaseExecutor
 {

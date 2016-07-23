@@ -6,7 +6,7 @@
  * Time: 下午 1:43
  */
 
-namespace Schedule\Job;
+namespace Wwtg99\Schedule\Job;
 
 
 class PgDumpJob extends CmdJob

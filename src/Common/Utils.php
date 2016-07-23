@@ -6,7 +6,7 @@
  * Time: 9:28
  */
 
-namespace Schedule\Common;
+namespace Wwtg99\Schedule\Common;
 
 
 use Carbon\Carbon;
@@ -161,9 +161,6 @@ class Utils
         } else {
             return false;
         }
-        if ($monf === true && isset($mon_add)) {
-            $mon += $mon_add;
-        }
         $dowf = self::parseCronField($dow);
         if ($dowf === true) {
             $dow = false;
@@ -183,8 +180,8 @@ class Utils
         }
         $next = Carbon::create($year, $mon, $date, $hour, $min);
         if ($dow && $next->dayOfWeek != $dow) {
-            if ($next->dayOfWeek > $dow) {
-                $next->addDays($next->dayOfWeek - $dow);
+            if ($next->dayOfWeek < $dow) {
+                $next->addDays($dow - $next->dayOfWeek);
             } else {
                 $next->addDays(7 - $next->dayOfWeek + $dow);
             }

@@ -6,7 +6,7 @@
  * Time: 11:51
  */
 
-namespace Schedule\Common;
+namespace Wwtg99\Schedule\Common;
 
 
 interface IExecutor

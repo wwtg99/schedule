@@ -10,7 +10,7 @@ date_default_timezone_set('Asia/Shanghai');
 
 //autoload
 require_once __DIR__ . DIRECTORY_SEPARATOR . '../vendor/autoload.php';
-$loader = new \ClassLoader\Loader(__DIR__ . DIRECTORY_SEPARATOR . '..', [['Schedule', 'src', true]]);
+$loader = new \ClassLoader\Loader(__DIR__ . DIRECTORY_SEPARATOR . '..', [['Wwtg99\Schedule', 'src', true]]);
 $loader->autoload();
 
 //default config file
@@ -18,7 +18,7 @@ $job_config = 'jobs.json';
 
 function showVersion()
 {
-    $version = 'Scheduler version 0.1.0';
+    $version = 'Scheduler version 0.1.6';
     echo $version . "\n";
 }
 
@@ -44,7 +44,7 @@ function showHelp()
 }
 
 /**
- * @param \Schedule\Common\IExecutor $executor
+ * @param \Wwtg99\Schedule\Common\IExecutor $executor
  */
 function register($executor)
 {
@@ -53,7 +53,7 @@ function register($executor)
 }
 
 /**
- * @param \Schedule\Common\IExecutor $executor
+ * @param \Wwtg99\Schedule\Common\IExecutor $executor
  */
 function unregister($executor)
 {
@@ -62,7 +62,7 @@ function unregister($executor)
 }
 
 /**
- * @param \Schedule\Common\IExecutor $executor
+ * @param \Wwtg99\Schedule\Common\IExecutor $executor
  */
 function listJobs($executor)
 {
@@ -74,7 +74,7 @@ function listJobs($executor)
 }
 
 /**
- * @param \Schedule\Common\IExecutor $executor
+ * @param \Wwtg99\Schedule\Common\IExecutor $executor
  * @param string $job
  */
 function addJob($executor, $job)
@@ -97,7 +97,7 @@ function addJob($executor, $job)
 }
 
 /**
- * @param \Schedule\Common\IExecutor $executor
+ * @param \Wwtg99\Schedule\Common\IExecutor $executor
  * @param string $name
  */
 function removeJob($executor, $name)
@@ -118,7 +118,7 @@ function removeJob($executor, $name)
 }
 
 /**
- * @param \Schedule\Common\IExecutor $executor
+ * @param \Wwtg99\Schedule\Common\IExecutor $executor
  * @return int
  */
 function run($executor)
@@ -152,7 +152,7 @@ function getConfig($conf = null, $opts = [])
 
 $code = 0;
 try {
-    $executor = new \Schedule\Executor\CronExecutor();
+    $executor = new \Wwtg99\Schedule\Executor\CronExecutor();
     if ($argc > 1) {
         $cmd = $argv[1];
         if ($cmd == 'register') {

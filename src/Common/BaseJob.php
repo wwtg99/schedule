@@ -6,7 +6,7 @@
  * Time: 16:54
  */
 
-namespace Schedule\Common;
+namespace Wwtg99\Schedule\Common;
 
 
 abstract class BaseJob implements IJob

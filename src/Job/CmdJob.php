@@ -6,10 +6,10 @@
  * Time: 14:26
  */
 
-namespace Schedule\Job;
+namespace Wwtg99\Schedule\Job;
 
 
-use Schedule\Common\BaseJob;
+use Wwtg99\Schedule\Common\BaseJob;
 
 class CmdJob extends BaseJob
 {
@@ -48,5 +48,4 @@ class CmdJob extends BaseJob
         }
         return 1;
     }
-
 }

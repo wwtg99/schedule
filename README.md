@@ -36,3 +36,23 @@ php bin/scheduler.php --list
 ```
 php bin/scheduler.php --run
 ```
+
+### Create custom job
+- Create job class extends CmdJob or implements IJob
+- Implement register() and run() function
+
+```
+class testJob extends CmdJob
+{
+    public function register()
+    {
+        return true;
+    }
+    
+    public function run()
+    {
+        return 0;
+    }
+}
+```
+- In the jobs.json, specify your full class name in type
